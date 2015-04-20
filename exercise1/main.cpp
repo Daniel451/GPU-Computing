@@ -5,10 +5,11 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
-
+// schluesseltabelle
 int a[26][26];
 
 
@@ -60,6 +61,21 @@ void viewTable()
 }
 
 
+char encryptChar(char cinput)
+{
+    std::string s = std::string(1, cinput);
+    std::regex e = std::regex("[a-z]");
+
+    if(std::regex_match(s, e))
+    {
+        //cinput = (char)(a[(int)cinput][0]);
+        //cinput = (char)toupper(cinput);
+    }
+
+    return cinput;
+}
+
+
 void encryptfile()
 {
     string filename = "";
@@ -68,6 +84,8 @@ void encryptfile()
     std::cout << "Dateipfad angeben:" << std::endl << "> ";
     std::cin >> filename;
     std::cout << std::endl;
+
+    filename = "/home/daniel/test.txt";
 
     char line[256];
     ifstream infile(filename, ios::in);
@@ -92,7 +110,7 @@ void encryptfile()
                 {
                     break;
                 }
-                std::cout << line[i];
+                std::cout << encryptChar(line[i]);
             }
 
             if (infile.peek() != EOF)
