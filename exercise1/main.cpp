@@ -108,6 +108,7 @@ void encryptfile()
 {
     string filename = "";
     string input_pw = "";
+    string encstring = "";
 
     std::cout << std::endl;
     std::cout << "Dateipfad angeben:" << std::endl << "> ";
@@ -130,6 +131,7 @@ void encryptfile()
     char line[256];
     ifstream infile(filename, ios::in);
 
+
     if (!infile)
     {
         std::cout << "Kein File gefunden :(" << std::endl;
@@ -137,12 +139,9 @@ void encryptfile()
 
     if (infile)
     {
-        std::cout << "Dateiinhalt:" << std::endl;
-        std::cout << ">>";
+
         while (infile.getline(line, 256))
         {
-            std::cout << line << std::endl;
-
             int i;
             for (i = 0; i < sizeof(line); i++)
             {
@@ -150,20 +149,18 @@ void encryptfile()
                 {
                     break;
                 }
-                std::cout << encryptChar(line[i]);
-            }
-            std::cout << std::endl;
-            for (i = 0; i < debugger.size(); i++)
-            {
-                std::cout << debugger[i];
+                encstring.append(string(1, encryptChar(line[i])));
             }
 
-            if (infile.peek() != EOF)
-            {
-                std::cout << std::endl;
-            }
         }
-        std::cout << "<<";
+
+        infile.close();
+
+        ofstream outfile(filename, ios::out);
+        outfile << encstring;
+        outfile.close();
+
+        std::cout << "Datei wurde verschluesselt." << std::endl;
 
     }
 }
