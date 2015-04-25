@@ -6,14 +6,14 @@
 #include <string>
 #include <fstream>
 #include <regex>
+#include <cmath>
 
 using namespace std;
 
 // schluesseltabelle
 int a[26][26];
-string debugger = "";
-string password = "HAMBURG";
 int pwindex = 0;
+string password = "HAMBURG";
 
 
 int giveback(char c)
@@ -23,6 +23,44 @@ int giveback(char c)
         c = (char) ((int) 'A' + (int) c - (int) 'Z' - 1);
     }
     return c;
+}
+
+
+string getZeile(int zeilennummer)
+{
+    string zeile = "";
+
+    int i;
+    for(i = 0; i < 26; i++)
+    {
+        zeile.append(string(1, (char) a[zeilennummer][i]));
+    }
+
+    return zeile;
+}
+
+
+string str2upper(string s)
+{
+    int z;
+    for(z = 0; z < s.size(); z++)
+    {
+        s[z] = toupper(s[z]);
+    }
+
+    return  s;
+}
+
+
+string str2lower(string s)
+{
+    int z;
+    for(z = 0; z < s.size(); z++)
+    {
+        s[z] = tolower(s[z]);
+    }
+
+    return s;
 }
 
 
@@ -104,61 +142,130 @@ char encryptChar(char cinput)
 }
 
 
-void encryptfile()
+char decryptChar(char cinput)
 {
-    string filename = "";
-    string input_pw = "";
-    string encstring = "";
+    std::string s = std::string(1, cinput);
+    std::regex e = std::regex("[a-z]|[A-Z]");
+
+    if(std::regex_match(s, e))
+    {
+        int zeilennummer = getPwInt();
+        string zeile = getZeile(zeilennummer);
+        int suche = zeile.find(cinput);
+        cinput = (char) a[0][suche];
+    }
+
+    return cinput;
+}
+
+
+void decryptfile()
+{
+    string decrypt_filename = "";
+    string decrypt_password = "";
+    string decrypt_string = "";
 
     std::cout << std::endl;
     std::cout << "Dateipfad angeben:" << std::endl << "> ";
-    std::cin >> filename;
+    std::cin >> decrypt_filename;
     std::cout << std::endl;
     std::cout << "Passwort angeben:" << std::endl << "> ";
-    std::cin >> input_pw;
+    std::cin >> decrypt_password;
     std::cout << std::endl;
 
-    filename = "/home/daniel/test.txt";
+    decrypt_filename = "/home/daniel/test.txt";
 
-    int z;
-    for(z = 0; z < input_pw.size(); z++)
-    {
-        input_pw[z] = toupper(input_pw[z]);
-    }
-    password = input_pw;
+    decrypt_password = str2upper(decrypt_password);
+
+    char decrypt_line[256];
+    ifstream decrypt_infile(decrypt_filename, ios::in);
 
 
-    char line[256];
-    ifstream infile(filename, ios::in);
-
-
-    if (!infile)
+    if (!decrypt_infile)
     {
         std::cout << "Kein File gefunden :(" << std::endl;
     }
 
-    if (infile)
+    if (decrypt_infile)
     {
 
-        while (infile.getline(line, 256))
+        while (decrypt_infile.getline(decrypt_line, 256))
         {
             int i;
-            for (i = 0; i < sizeof(line); i++)
+            for (i = 0; i < sizeof(decrypt_line); i++)
             {
-                if (line[i] == '\0') // wenn das Ende des String erreicht wurde
+                if (decrypt_line[i] == '\0') // wenn das Ende des String erreicht wurde
                 {
                     break;
                 }
-                encstring.append(string(1, encryptChar(line[i])));
+                decrypt_string.append(string(1, decryptChar(decrypt_line[i])));
             }
 
         }
 
-        infile.close();
+        decrypt_string = str2lower(decrypt_string);
 
-        ofstream outfile(filename, ios::out);
-        outfile << encstring;
+        decrypt_infile.close();
+
+        ofstream outfile(decrypt_filename, ios::out);
+        outfile << decrypt_string;
         outfile.close();
+
+        std::cout << "Datei wurde entschluesselt." << std::endl;
+    }
+}
+
+
+void encryptfile()
+{
+    string encrypt_filename = "";
+    string encrypt_password = "";
+    string encrypt_string = "";
+
+    std::cout << std::endl;
+    std::cout << "Dateipfad angeben:" << std::endl << "> ";
+    std::cin >> encrypt_filename;
+    std::cout << std::endl;
+    std::cout << "Passwort angeben:" << std::endl << "> ";
+    std::cin >> encrypt_password;
+    std::cout << std::endl;
+
+    encrypt_filename = "/home/daniel/test.txt";
+
+    password = str2upper(encrypt_password);
+
+
+    char encrypt_line[256];
+    ifstream encrypt_infile(encrypt_filename, ios::in);
+
+
+    if (!encrypt_infile)
+    {
+        std::cout << "Kein File gefunden :(" << std::endl;
+    }
+
+    if (encrypt_infile)
+    {
+
+        while (encrypt_infile.getline(encrypt_line, 256))
+        {
+            int i;
+            for (i = 0; i < sizeof(encrypt_line); i++)
+            {
+                if (encrypt_line[i] == '\0') // wenn das Ende des String erreicht wurde
+                {
+                    break;
+                }
+                encrypt_string.append(string(1, encryptChar(encrypt_line[i])));
+            }
+
+        }
+
+        encrypt_infile.close();
+
+        ofstream encrypt_outfile(encrypt_filename, ios::out);
+        encrypt_outfile << encrypt_string;
+        encrypt_outfile.close();
 
         std::cout << "Datei wurde verschluesselt." << std::endl;
 
@@ -194,6 +301,7 @@ void printmenu()
     }
     else if (eingabe == "e")
     {
+        decryptfile();
     }
     else if (eingabe == "a")
     {
