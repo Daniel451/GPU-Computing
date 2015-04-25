@@ -11,22 +11,51 @@ using namespace std;
 
 // schluesseltabelle
 int a[26][26];
+string debugger = "";
+string password = "HAMBURG";
+int pwindex = 0;
 
 
 int giveback(char c)
 {
-    if ((int) c > (int) 'z')
+    if ((int) c > (int) 'Z')
     {
-        c = (char) ((int) 'a' + (int) c - (int) 'z' - 1);
+        c = (char) ((int) 'A' + (int) c - (int) 'Z' - 1);
     }
     return c;
 }
 
 
+int getPwInt()
+{
+    int ret; // container
+
+    // get current password character for encryption
+    // -'A' is needed for normalization purposes (A-Z ASCII ints to [0-25])
+    ret = (int) password[pwindex] - (int) 'A';
+
+    pwindex = (pwindex + 1) % password.size();
+
+    return ret;
+}
+
+
+int getCharInt(char input)
+{
+    int ret; // container
+
+    input = toupper(input);
+
+    ret = (int)input - (int)'A';
+
+    return ret;
+}
+
+
 void createtable()
 {
-    char cx = 'a';
-    char cy = 'a';
+    char cx = 'A';
+    char cy = 'A';
     int x = 0;
     int y = 0;
 
@@ -35,7 +64,7 @@ void createtable()
         for (y = 0; y < 26; y++)
         {
             a[x][y] = cy;
-            cy = giveback(cy + 1); // inneren char inkrementieren
+            cy = (char) giveback(cy + 1); // inneren char inkrementieren
         }
         cx++; // �u�eren char inkrementieren
         cy = cx;
@@ -64,12 +93,11 @@ void viewTable()
 char encryptChar(char cinput)
 {
     std::string s = std::string(1, cinput);
-    std::regex e = std::regex("[a-z]");
+    std::regex e = std::regex("[a-z]|[A-Z]");
 
     if(std::regex_match(s, e))
     {
-        //cinput = (char)(a[(int)cinput][0]);
-        //cinput = (char)toupper(cinput);
+        cinput = (char) a[getPwInt()][getCharInt(cinput)];
     }
 
     return cinput;
@@ -79,13 +107,25 @@ char encryptChar(char cinput)
 void encryptfile()
 {
     string filename = "";
+    string input_pw = "";
 
     std::cout << std::endl;
     std::cout << "Dateipfad angeben:" << std::endl << "> ";
     std::cin >> filename;
     std::cout << std::endl;
+    std::cout << "Passwort angeben:" << std::endl << "> ";
+    std::cin >> input_pw;
+    std::cout << std::endl;
 
     filename = "/home/daniel/test.txt";
+
+    int z;
+    for(z = 0; z < input_pw.size(); z++)
+    {
+        input_pw[z] = toupper(input_pw[z]);
+    }
+    password = input_pw;
+
 
     char line[256];
     ifstream infile(filename, ios::in);
@@ -111,6 +151,11 @@ void encryptfile()
                     break;
                 }
                 std::cout << encryptChar(line[i]);
+            }
+            std::cout << std::endl;
+            for (i = 0; i < debugger.size(); i++)
+            {
+                std::cout << debugger[i];
             }
 
             if (infile.peek() != EOF)
