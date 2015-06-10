@@ -40,7 +40,7 @@ string getZeile(int zeilennummer)
 }
 
 
-string str2upper(string s)
+string nstr2upper(string s)
 {
     int z;
     for(z = 0; z < s.size(); z++)
